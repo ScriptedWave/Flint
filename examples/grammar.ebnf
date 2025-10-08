@@ -1,0 +1,10 @@
+program = func ;
+func = "func", ident, "(", ")", "void", scope ;
+ident = letter, { letter | number } ;
+letter = "a" ... "z" | "A" ... "Z" ;
+number = "0" ... "9" ;
+scope = ":", { stmt }, "." ;
+stmt = stmt_print | stmt_exit ;
+stmt_print = "print", "(", lit_int, ")" ;
+stmt_exit = "exit", "(", lit_int, ")" ;
+lit_int = number, { number } ;
