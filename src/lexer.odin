@@ -1,6 +1,5 @@
 package main
 
-import "core:debug/pe"
 import "core:unicode"
 import "core:fmt"
 
