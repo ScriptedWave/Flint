@@ -1,5 +1,7 @@
 package main
 
+import "core:debug/pe"
+import "core:unicode"
 import "core:fmt"
 
 lex :: proc(src: string) -> []Token {
@@ -24,19 +26,75 @@ lex :: proc(src: string) -> []Token {
     tokens: [dynamic]Token
 
     for true {
-        if _, ok := peek(&self); !ok {
+        ch, ok := peek(&self)
+        if !ok {
             break;
         }
 
-        ch, _ := peek(&self)
+        switch {
+            case ch == '(': { append(&tokens, tokenNew(.PuncLParen, "(")); eat(&self) }
+            case ch == ')': { append(&tokens, tokenNew(.PuncRParen, ")")); eat(&self) }
+            case ch == ':': { append(&tokens, tokenNew(.PuncColon, ":")); eat(&self) }
+            case ch == ';': { append(&tokens, tokenNew(.PuncSemi, ";")); eat(&self) }
+            case ch == '.': { append(&tokens, tokenNew(.PuncDot, ".")); eat(&self) }
 
-        switch ch {
-            case '(': { append(&tokens, tokenNew(.PuncLParen, "(")); eat(&self) }
-            case ')': { append(&tokens, tokenNew(.PuncRParen, ")")); eat(&self) }
-            case ':': { append(&tokens, tokenNew(.PuncColon, ":")); eat(&self) }
-            case ';': { append(&tokens, tokenNew(.PuncSemi, ";")); eat(&self) }
-            case '.': { append(&tokens, tokenNew(.PuncDot, ".")); eat(&self) }
-            case: { eat(&self) }
+            case unicode.is_letter(rune(ch)): {
+                buffer: [dynamic]u8
+
+                for true {
+                    ch, ok := peek(&self)
+
+                    if !ok || (!unicode.is_letter(rune(ch)) && !unicode.is_number(rune(ch)) && ch != '_') {
+                        break
+                    }
+
+                    append(&buffer, ch)
+                    eat(&self)
+                }
+
+                str := string(buffer[:])
+
+                if str == "func" {
+                    append(&tokens, tokenNew(.KeyFunc, string(buffer[:])))
+                }
+                else if str == "void" {
+                    append(&tokens, tokenNew(.KeyVoid, string(buffer[:])))
+                }
+                else if str == "print" {
+                    append(&tokens, tokenNew(.KeyPrint, string(buffer[:])))
+                }
+                else if str == "exit" {
+                    append(&tokens, tokenNew(.KeyExit, string(buffer[:])))
+                }
+                else {
+                    append(&tokens, tokenNew(.Identifier, string(buffer[:])))
+                }
+            }
+
+            case unicode.is_number(rune(ch)): {
+                buffer: [dynamic]u8
+
+                for true {
+                    ch, ok := peek(&self)
+
+                    if !ok || (!unicode.is_number(rune(ch))) {
+                        break
+                    }
+
+                    append(&buffer, ch)
+                    eat(&self)
+                }
+
+                append(&tokens, tokenNew(.LitInt, string(buffer[:])))
+            }
+
+            case unicode.is_white_space(rune(ch)): {
+                eat(&self)
+            }
+
+            case: {
+                panic("Invalic character.")
+            }
         }
     }
 
