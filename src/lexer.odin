@@ -2,7 +2,7 @@ package main
 
 import "core:fmt"
 
-lex :: proc(src: string) {
+lex :: proc(src: string) -> []Token {
 
     Lexer :: struct {
         src: string,
@@ -21,11 +21,24 @@ lex :: proc(src: string) {
     }
 
     self := Lexer{ src = src, idx = 0 }
+    tokens: [dynamic]Token
 
     for true {
         if _, ok := peek(&self); !ok {
             break;
         }
-        fmt.println(rune(eat(&self)))
+
+        ch, _ := peek(&self)
+
+        switch ch {
+            case '(': { append(&tokens, tokenNew(.PuncLParen, "(")); eat(&self) }
+            case ')': { append(&tokens, tokenNew(.PuncRParen, ")")); eat(&self) }
+            case ':': { append(&tokens, tokenNew(.PuncColon, ":")); eat(&self) }
+            case ';': { append(&tokens, tokenNew(.PuncSemi, ";")); eat(&self) }
+            case '.': { append(&tokens, tokenNew(.PuncDot, ".")); eat(&self) }
+            case: { eat(&self) }
+        }
     }
+
+    return tokens[:]
 }
