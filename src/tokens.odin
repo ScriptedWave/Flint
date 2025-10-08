@@ -2,10 +2,16 @@ package main
 
 TokenKind :: enum {
     Identifier,
-    Keyword,
-    Punctuator,
-    Operator,
-    Literal
+    KeyFunc,
+    KeyVoid,
+    KeyPrint,
+    KeyExit,
+    PuncLParen,
+    PuncRParen,
+    PuncColon,
+    PuncSemi,
+    PuncDot,
+    LitInt,
 }
 
 Token :: struct {
@@ -13,6 +19,6 @@ Token :: struct {
     value: string
 }
 
-token_new :: proc(kind: TokenKind, value: string) -> Token {
+tokenNew :: proc(kind: TokenKind, value: string) -> Token {
     return Token{ kind = kind, value = value }
 }
