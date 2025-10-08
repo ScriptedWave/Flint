@@ -3,5 +3,7 @@ package main
 import "core:fmt"
 
 main :: proc() {
-    fmt.println("Hello, World!")
+    filename := get_filename()
+    content := get_file_content(filename)
+    fmt.println(content)
 }
